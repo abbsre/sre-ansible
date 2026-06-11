@@ -1,0 +1,11 @@
+---
+- name: Bootstrap new VM
+  hosts: all
+  become: true
+
+  roles:
+    - common_base
+    - users_ssh
+    - security_baseline
+    - firewall
+    - monitoring_agent

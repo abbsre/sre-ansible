@@ -1,0 +1,8 @@
+---
+compose_project_name: uptime-kuma
+compose_template_src: "../../services/uptime_kuma/docker-compose.yml.j2"
+compose_env_template_src: "../../services/uptime_kuma/env.j2"
+
+uptime_kuma_image: louislam/uptime-kuma:1
+uptime_kuma_port: 3001
+uptime_kuma_volume: uptime_kuma_data

@@ -1,0 +1,41 @@
+---
+- name: Validate compose project variables
+  ansible.builtin.assert:
+    that:
+      - compose_project_name | length > 0
+      - compose_template_src | length > 0
+    fail_msg: "compose_project_name and compose_template_src are required."
+
+- name: Create compose project directory
+  ansible.builtin.file:
+    path: "{{ compose_project_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render docker compose file
+  ansible.builtin.template:
+    src: "{{ compose_template_src }}"
+    dest: "{{ compose_project_dir }}/compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart compose project
+
+- name: Render environment file
+  ansible.builtin.template:
+    src: "{{ compose_env_template_src }}"
+    dest: "{{ compose_project_dir }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  when: compose_env_template_src | length > 0
+  notify: Restart compose project
+
+- name: Deploy compose project
+  community.docker.docker_compose_v2:
+    project_src: "{{ compose_project_dir }}"
+    state: "{{ compose_state }}"
+    pull: "{{ compose_pull }}"
+    remove_orphans: "{{ compose_remove_orphans }}"

@@ -1,0 +1,7 @@
+---
+- name: Install Docker host requirements
+  hosts: docker_hosts
+  become: true
+
+  roles:
+    - docker_engine

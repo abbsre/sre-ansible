@@ -1,0 +1,21 @@
+---
+- name: Deploy Docker Compose service
+  hosts: "{{ target | default('docker_hosts') }}"
+  become: true
+
+  vars:
+    service_name: ""
+
+  pre_tasks:
+    - name: Validate service name
+      ansible.builtin.assert:
+        that:
+          - service_name | length > 0
+        fail_msg: "You must provide -e service_name=<service_folder_name>"
+
+    - name: Load service variables
+      ansible.builtin.include_vars:
+        file: "../services/{{ service_name }}/vars.yml"
+
+  roles:
+    - role: compose_project

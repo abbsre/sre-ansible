@@ -1,0 +1,3 @@
+---
+- import_playbook: bootstrap_vm.yml
+- import_playbook: install_docker.yml

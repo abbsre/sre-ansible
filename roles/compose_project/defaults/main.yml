@@ -1,0 +1,8 @@
+---
+compose_project_name: ""
+compose_project_dir: "{{ compose_base_dir }}/{{ compose_project_name }}"
+compose_template_src: ""
+compose_env_template_src: ""
+compose_pull: always
+compose_remove_orphans: true
+compose_state: present
