@@ -1,0 +1,62 @@
+---
+- name: Install SSH package
+  ansible.builtin.apt:
+    name: openssh-server
+    state: present
+
+- name: Install fail2ban package
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+  when: security_install_fail2ban
+
+- name: Ensure SSH config drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Configure SSH hardening drop-in
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/99-bootstrap-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      PasswordAuthentication {{ 'yes' if ssh_password_authentication else 'no' }}
+      PermitRootLogin {{ 'yes' if ssh_permit_root_login else 'no' }}
+      PubkeyAuthentication yes
+      KbdInteractiveAuthentication no
+      X11Forwarding {{ 'yes' if ssh_x11_forwarding else 'no' }}
+  notify: Reload ssh
+
+- name: Ensure SSH service is enabled and running
+  ansible.builtin.service:
+    name: ssh
+    enabled: true
+    state: started
+
+- name: Configure fail2ban SSH jail
+  ansible.builtin.copy:
+    dest: /etc/fail2ban/jail.d/sshd.local
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [sshd]
+      enabled = true
+      port = ssh
+      filter = sshd
+      logpath = %(sshd_log)s
+      maxretry = 5
+  when: security_install_fail2ban
+  notify: Restart fail2ban
+
+- name: Ensure fail2ban is enabled and running
+  ansible.builtin.service:
+    name: fail2ban
+    enabled: true
+    state: started
+  when: security_install_fail2ban

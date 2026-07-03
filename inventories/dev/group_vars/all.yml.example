@@ -1,0 +1,7 @@
+---
+bootstrap_timezone: America/Argentina/Buenos_Aires
+
+bootstrap_admin_users:
+  - name: admin
+    ssh_keys:
+      - "ssh-ed25519 REPLACE_WITH_PUBLIC_KEY admin@example"

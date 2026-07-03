@@ -1,0 +1,14 @@
+---
+docker_apt_repo_base_url: https://download.docker.com/linux
+docker_apt_key_path: /etc/apt/keyrings/docker.asc
+docker_add_bootstrap_admins_to_group: true
+docker_arch_map:
+  x86_64: amd64
+  aarch64: arm64
+  armv7l: armhf
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin

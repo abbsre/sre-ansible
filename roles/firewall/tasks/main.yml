@@ -1,0 +1,53 @@
+---
+- name: Preseed iptables-persistent autosave prompts
+  ansible.builtin.debconf:
+    name: iptables-persistent
+    question: "{{ item }}"
+    value: "true"
+    vtype: boolean
+  loop:
+    - iptables-persistent/autosave_v4
+    - iptables-persistent/autosave_v6
+
+- name: Install iptables persistence packages
+  ansible.builtin.apt:
+    name:
+      - iptables
+      - iptables-persistent
+      - netfilter-persistent
+    state: present
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Ensure iptables rules directory exists
+  ansible.builtin.file:
+    path: /etc/iptables
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render IPv4 firewall rules
+  ansible.builtin.template:
+    src: rules.v4.j2
+    dest: /etc/iptables/rules.v4
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload netfilter rules
+
+- name: Render IPv6 firewall rules
+  ansible.builtin.template:
+    src: rules.v6.j2
+    dest: /etc/iptables/rules.v6
+    owner: root
+    group: root
+    mode: "0644"
+  when: firewall_manage_ipv6
+  notify: Reload netfilter rules
+
+- name: Ensure netfilter-persistent is enabled and running
+  ansible.builtin.service:
+    name: netfilter-persistent
+    enabled: true
+    state: started
