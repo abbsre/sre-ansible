@@ -1,0 +1,5 @@
+---
+ssh_password_authentication: false
+ssh_permit_root_login: true
+ssh_x11_forwarding: false
+security_install_fail2ban: true

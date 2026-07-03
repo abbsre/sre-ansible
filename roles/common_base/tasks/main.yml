@@ -1,0 +1,21 @@
+---
+- name: Validate supported OS family
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "Debian"
+    fail_msg: "common_base currently supports only Ubuntu/Debian hosts."
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name: "{{ bootstrap_base_packages }}"
+    state: present
+
+- name: Configure timezone
+  community.general.timezone:
+    name: "{{ bootstrap_timezone }}"
+  when: bootstrap_timezone | length > 0

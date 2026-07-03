@@ -1,0 +1,5 @@
+---
+- name: Reload netfilter rules
+  ansible.builtin.service:
+    name: netfilter-persistent
+    state: restarted

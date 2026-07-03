@@ -1,0 +1,10 @@
+---
+bootstrap_timezone: ""
+bootstrap_base_packages:
+  - ca-certificates
+  - curl
+  - gnupg
+  - vim
+  - htop
+  - net-tools
+  - unzip

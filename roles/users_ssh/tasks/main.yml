@@ -1,0 +1,49 @@
+---
+- name: Validate admin users are defined
+  ansible.builtin.assert:
+    that:
+      - bootstrap_admin_users | length > 0
+      - >-
+        bootstrap_admin_users | selectattr('name', 'defined') | list | length
+        == bootstrap_admin_users | length
+      - >-
+        bootstrap_admin_users | selectattr('ssh_keys', 'defined') | list | length
+        == bootstrap_admin_users | length
+    fail_msg: "Define bootstrap_admin_users with name and ssh_keys before running bootstrap."
+
+- name: Create passwordless admin group
+  ansible.builtin.group:
+    name: "{{ bootstrap_admin_group }}"
+    state: present
+
+- name: Create admin users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    groups: >-
+      {{ ([bootstrap_admin_group, 'sudo'] + (item.groups | default([])))
+      | unique | join(',') }}
+    append: true
+    create_home: true
+    state: present
+  loop: "{{ bootstrap_admin_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Install admin SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.name }}"
+    key: "{{ item.1 }}"
+    state: present
+  loop: "{{ bootstrap_admin_users | subelements('ssh_keys') }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+
+- name: Allow admin group to sudo without password
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ bootstrap_admin_group }}"
+    owner: root
+    group: root
+    mode: "0440"
+    content: "%{{ bootstrap_admin_group }} ALL=(ALL) NOPASSWD:ALL\n"
+    validate: "visudo -cf %s"
